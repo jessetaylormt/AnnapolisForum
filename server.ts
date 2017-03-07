@@ -44,7 +44,10 @@ app.get('/api/recent-threads', function (req, res) {
     ORDER BY timestamp
     `;
     queryDB(queryString, function(err, result){
-        if(err) res.status(500).json({"error" : dbErrorMessage});
+        if(err) {
+            console.log("!!" + err + "!!");
+            res.status(500).json({"error" : dbErrorMessage});
+        }
         else res.status(200).json({"data" : result, "error" : false});
     });
 });
