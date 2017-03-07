@@ -18,7 +18,7 @@ var user = {
     }
 };
 
-var port: number = 4000;
+var port: number = 80;
 app.listen(port, function () {
     console.log('Annapolis-forum app listening on port ' + port + '!');
 });
