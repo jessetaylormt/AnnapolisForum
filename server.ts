@@ -45,7 +45,6 @@ app.get('/api/recent-threads', function (req, res) {
     `;
     queryDB(queryString, function(err, result){
         if(err) {
-            console.log("!!" + err + "!!");
             res.status(500).json({"error" : dbErrorMessage});
         }
         else res.status(200).json({"data" : result, "error" : false});
