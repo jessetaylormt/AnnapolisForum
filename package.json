@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "npm run build:live",
-    "build:live": "nodemon --exec node_modules\\.bin\\ts-node -- server.ts"
+    "build:live": "nodemon --exec node_modules/.bin/ts-node -- server.ts"
   },
   "keywords": [],
   "author": "jessetaylor.mt",
