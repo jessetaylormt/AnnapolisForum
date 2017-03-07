@@ -10,8 +10,8 @@ import { Post } from './post';
 @Injectable()
 export class QueryService {
 
-    //baseURL = "http://69.255.35.9:8080/"
-    baseURL = "http://localhost:4000/"
+    baseURL = 'http://' + document.location.host + '/';
+
     private recentThreadsUrl = this.baseURL + 'api/recent-threads';
     private searchUrl = this.baseURL + 'api/search';
     private threadUrl = this.baseURL + 'api/thread';
