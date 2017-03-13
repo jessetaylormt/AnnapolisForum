@@ -1,6 +1,7 @@
 .vscode
 node_modules
 server.js
+readme-images/
 
 # Developer needs to update their own credentials
 db-credentials.json
