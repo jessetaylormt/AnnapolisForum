@@ -1,6 +1,7 @@
 var express = require('express');
 var session = require('express-session');
 var bodyParser  = require('body-parser');
+var fs = require('fs');
 var app = express();
 var user = {
     username: null,
@@ -21,7 +22,10 @@ var user = {
 var port: number = 80;
 app.listen(port, function () {
     console.log('Annapolis-forum app listening on port ' + port + '!');
+    
 });
+
+
 
 const path = require('path');
 //app.use(express.static(path.join(__dirname, 'public'))); //<-- can be used if see OS dependent issues
@@ -45,6 +49,7 @@ app.get('/api/recent-threads', function (req, res) {
     `;
     queryDB(queryString, function(err, result){
         if(err) {
+            DB_log(err);
             res.status(500).json({"error" : dbErrorMessage});
         }
         else res.status(200).json({"data" : result, "error" : false});
@@ -75,7 +80,10 @@ app.get('/api/search', function (req, res) {
     ORDER BY timestamp
     `;
     queryDB(queryString, function(err, result){
-        if(err) res.status(500).json({"error" : dbErrorMessage});
+        if(err) {
+            DB_log(err);
+            res.status(500).json({"error" : dbErrorMessage});
+        }
         else res.status(200).json({"data" : result, "error" : false});
     });
 });
@@ -95,7 +103,10 @@ app.get('/api/thread-posts/:id', function (req, res) {
     var queryString = `SELECT post_text AS text, author, datetime AS timestamp 
     FROM annapolis_forum.posts WHERE thread_id=` + threadId;
     queryDB(queryString, function(err, result){
-        if(err) res.status(500).json({"error" : dbErrorMessage});
+        if(err) {
+            DB_log(err);
+            res.status(500).json({"error" : dbErrorMessage});
+        }
         else if(result.length == 0) res.status(404).json({"error" : "Could not find thread requested."});
         else res.status(200).json({"data" : result, "error" : false});
     });
@@ -112,6 +123,7 @@ app.post('/api/thread/:id', checkAuthorized, function(req, res) {
     //this try catch block is likely unnecessary - need to investigate SQL Injection Attacks more thoroughly
     try {newPost = cleanSQLObject(newPost);}
     catch(err) {
+        DB_log(err);
         res.status(500).json({"error" : err.message});
         return;
     }
@@ -121,7 +133,10 @@ app.post('/api/thread/:id', checkAuthorized, function(req, res) {
         VALUES ('`+ newPost.threadId + `','` + newPost.author + `','` + newPost.text + `')`;
     
     queryDB(queryString, function(err, result){
-        if(err) res.status(500).json({"error" : dbErrorMessage});
+        if(err) {
+            DB_log(err);
+            res.status(500).json({"error" : dbErrorMessage});
+        }
         else res.status(201).json({"data" : result, "error" : false});
     });
 });
@@ -143,7 +158,10 @@ app.post('/api/new-thread', checkAuthorized, function(req, res) {
     var postQueryString2 = `', '` + newThread.firstPost + `','` + newThread.author + `')`;
 
     queryDB(queryString, function(err, result) {
-            if(err) res.status(500).json({"error" : dbErrorMessage});
+            if(err) {
+                DB_log(err);
+                res.status(500).json({"error" : dbErrorMessage});
+            }
             else {
                 //successful thread creation. Create first post.
                 var newThreadId = result.insertId;
@@ -152,6 +170,7 @@ app.post('/api/new-thread', checkAuthorized, function(req, res) {
                         if(err2) {
                             //in the unlikely event that the thread is created but not the first post, client can simply request a new thread
                             //db admin will need to clean out this dead thread later, since db is having issues right now
+                            DB_log(err2);
                             res.status(500).json({"error" : "thread instatiated but first post lost"});
                             console.log("Failed first post on thead creation for threadId=" + newThreadId);
                         }
@@ -302,4 +321,9 @@ function checkAcceptedChars(text) {
             if( /[^a-zA-Z0-9@.&\$\-]/.test( text[i]) ) return false;
         }
         return true;
+}
+
+function DB_log(newError: string) {
+    var datetime = new Date();
+    fs.appendFile("./db_communication.log", datetime + "--\r\n" + newError + "\r\n\r\n", null);
 }

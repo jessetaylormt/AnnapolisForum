@@ -4,3 +4,4 @@ server.js
 
 # Developer needs to update their own credentials
 db-credentials.json
+db_communication.log
